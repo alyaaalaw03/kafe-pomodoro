@@ -1,0 +1,15 @@
+{
+  "name": "Kafe Pomodoro",
+  "short_name": "Pomodoro",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#2c1e16",
+  "theme_color": "#2c1e16",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ]
+}

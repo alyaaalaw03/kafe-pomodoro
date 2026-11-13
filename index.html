@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kafe Pomodoro ☕</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,600;1,400&family=Poppins:wght@400;600;700&display=swap');
+
+        :root {
+            --bg-gradient: linear-gradient(135deg, #2c1e16 0%, #4a3525 100%);
+            --card-bg: rgba(255, 248, 240, 0.08);
+            --accent-color: #d4a373;
+            --text-color: #faedcd;
+            --btn-bg: #d4a373;
+            --btn-text: #2c1e16;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            transition: background 0.8s ease;
+            overflow: hidden;
+        }
+
+        .ambient-circle {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(212, 163, 115, 0.15) 0%, rgba(0,0,0,0) 70%);
+            z-index: 0;
+            pointer-events: none;
+        }
+        .circle-1 { width: 400px; height: 400px; top: -100px; left: -100px; }
+        .circle-2 { width: 500px; height: 500px; bottom: -150px; right: -100px; }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            background-color: var(--card-bg);
+            padding: 2rem;
+            border-radius: 24px;
+            width: 90%;
+            max-width: 460px;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(250, 237, 205, 0.15);
+        }
+
+        .cafe-header {
+            font-family: 'Lora', serif;
+            font-size: 1.3rem;
+            margin-bottom: 1.2rem;
+            color: var(--accent-color);
+            letter-spacing: 1px;
+        }
+
+        .modes {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            margin-bottom: 1.2rem;
+            background: rgba(0, 0, 0, 0.25);
+            padding: 6px;
+            border-radius: 12px;
+        }
+
+        .mode-btn {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            padding: 8px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            opacity: 0.7;
+            transition: all 0.3s;
+            flex: 1;
+        }
+
+        .mode-btn.active {
+            background-color: var(--accent-color);
+            color: var(--btn-text);
+            opacity: 1;
+        }
+
+        .settings-panel {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .settings-panel label {
+            opacity: 0.9;
+        }
+
+        .time-input {
+            width: 65px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--accent-color);
+            color: var(--text-color);
+            padding: 6px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1rem;
+            font-weight: 600;
+            outline: none;
+        }
+
+        .timer {
+            font-size: 4.8rem;
+            font-weight: 700;
+            margin: 0.8rem 0;
+            letter-spacing: 3px;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 1rem;
+        }
+
+        .main-btn {
+            background-color: var(--btn-bg);
+            color: var(--btn-text);
+            border: none;
+            padding: 12px 32px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.15s, background-color 0.3s;
+        }
+
+        .main-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .main-btn:active {
+            transform: translateY(2px);
+        }
+
+        .reset-btn {
+            background-color: rgba(250, 237, 205, 0.1);
+            color: var(--text-color);
+            border: 1px solid rgba(250, 237, 205, 0.2);
+            padding: 12px 18px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .reset-btn:hover {
+            background-color: rgba(250, 237, 205, 0.2);
+        }
+
+        .ambience-panel {
+            margin-top: 1.5rem;
+            padding-top: 1.2rem;
+            border-top: 1px solid rgba(250, 237, 205, 0.15);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .audio-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .sound-toggle {
+            background: rgba(212, 163, 115, 0.2);
+            border: 1px solid var(--accent-color);
+            color: var(--text-color);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s;
+        }
+
+        .sound-toggle.playing {
+            background: var(--accent-color);
+            color: var(--btn-text);
+            font-weight: 600;
+        }
+
+        input[type="range"] {
+            accent-color: var(--accent-color);
+            width: 100px;
+            cursor: pointer;
+        }
+
+        .stats {
+            margin-top: 0.8rem;
+            font-size: 0.85rem;
+            opacity: 0.85;
+            font-family: 'Lora', serif;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ambient-circle circle-1"></div>
+    <div class="ambient-circle circle-2"></div>
+
+    <div class="container">
+        <div class="cafe-header">☕ Kafe Köşesi Pomodoro</div>
+
+        <div class="modes">
+            <button class="mode-btn active" id="btn-pomodoro" onclick="switchMode('pomodoro')">Odaklan</button>
+            <button class="mode-btn" id="btn-short" onclick="switchMode('short')">Kahve Molası</button>
+            <button class="mode-btn" id="btn-long" onclick="switchMode('long')">Uzun Mola</button>
+        </div>
+
+        <div class="settings-panel">
+            <label for="minuteInput">Süre (Dakika):</label>
+            <input type="number" id="minuteInput" class="time-input" min="1" max="120" value="25" oninput="updateCustomTime()">
+        </div>
+
+        <div class="timer" id="timer">25:00</div>
+
+        <div class="controls">
+            <button class="main-btn" id="startBtn" onclick="toggleTimer()">Başlat</button>
+            <button class="reset-btn" onclick="resetTimer()">Sıfırla</button>
+        </div>
+
+        <div class="ambience-panel">
+            <div class="audio-controls">
+                <button class="sound-toggle" id="soundBtn" onclick="toggleAmbience()">
+                    <span id="soundIcon">🔇</span> <span id="soundText">Kafe Ortamı: Kapalı</span>
+                </button>
+                <input type="range" id="volumeSlider" min="0" max="1" step="0.05" value="0.4" oninput="changeVolume(this.value)" title="Ses Seviyesi">
+            </div>
+            <div class="stats">
+                İçilen Kahve: <strong id="count">0</strong> ☕
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const modes = {
+            pomodoro: { time: 25, gradient: 'linear-gradient(135deg, #2c1e16 0%, #4a3525 100%)', accent: '#d4a373' },
+            short: { time: 5, gradient: 'linear-gradient(135deg, #3d2c2e 0%, #5c4346 100%)', accent: '#e6ccb2' },
+            long: { time: 15, gradient: 'linear-gradient(135deg, #283618 0%, #3a4f24 100%)', accent: '#ccd5ae' }
+        };
+
+        let currentMode = 'pomodoro';
+        let timeLeft = modes[currentMode].time * 60;
+        let timerId = null;
+        let isRunning = false;
+        let completedCount = 0;
+
+        const timerDisplay = document.getElementById('timer');
+        const startBtn = document.getElementById('startBtn');
+        const countDisplay = document.getElementById('count');
+        const minuteInput = document.getElementById('minuteInput');
+
+        let audioCtx = null;
+        let masterGain = null;
+        let isAmbiencePlaying = false;
+        let clinkInterval = null;
+        let chordInterval = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                masterGain = audioCtx.createGain();
+                masterGain.gain.value = document.getElementById('volumeSlider').value;
+                masterGain.connect(audioCtx.destination);
+            }
+        }
+
+        function startCafeMurmur() {
+            const bufferSize = 2 * audioCtx.sampleRate;
+            const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const output = noiseBuffer.getChannelData(0);
+            let lastOut = 0.0;
+            for (let i = 0; i < bufferSize; i++) {
+                const white = Math.random() * 2 - 1;
+                output[i] = (lastOut + (0.02 * white)) / 1.02;
+                lastOut = output[i];
+                output[i] *= 1.5;
+            }
+            const whiteNoise = audioCtx.createBufferSource();
+            whiteNoise.buffer = noiseBuffer;
+            whiteNoise.loop = true;
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.value = 350;
+            const murmurGain = audioCtx.createGain();
+            murmurGain.gain.value = 0.35;
+            whiteNoise.connect(filter);
+            filter.connect(murmurGain);
+            murmurGain.connect(masterGain);
+            whiteNoise.start();
+            return whiteNoise;
+        }
+
+        function playCupClink() {
+            if (!isAmbiencePlaying) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            const freq = 2200 + Math.random() * 800;
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.04, audioCtx.currentTime + 0.01);
+            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.15);
+            osc.connect(gain);
+            gain.connect(masterGain);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.16);
+        }
+
+        const chords = [
+            [261.63, 329.63, 392.00, 493.88],
+            [220.00, 261.63, 329.63, 392.00],
+            [174.61, 220.00, 261.63, 329.63],
+            [196.00, 246.94, 293.66, 349.23]
+        ];
+        let chordStep = 0;
+
+        function playLofiChord() {
+            if (!isAmbiencePlaying) return;
+            const currentChord = chords[chordStep % chords.length];
+            chordStep++;
+            currentChord.forEach(freq => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                const filter = audioCtx.createBiquadFilter();
+                osc.type = 'triangle';
+                osc.frequency.value = freq;
+                filter.type = 'lowpass';
+                filter.frequency.value = 600;
+                gain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.03, audioCtx.currentTime + 1.0);
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 4.5);
+                osc.connect(filter);
+                filter.connect(gain);
+                gain.connect(masterGain);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 4.6);
+            });
+        }
+
+        let murmurNode = null;
+
+        function toggleAmbience() {
+            initAudio();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const btn = document.getElementById('soundBtn');
+            const icon = document.getElementById('soundIcon');
+            const text = document.getElementById('soundText');
+
+            if (isAmbiencePlaying) {
+                isAmbiencePlaying = false;
+                if (murmurNode) murmurNode.stop();
+                clearInterval(clinkInterval);
+                clearInterval(chordInterval);
+                btn.classList.remove('playing');
+                icon.textContent = '🔇';
+                text.textContent = 'Kafe Ortamı: Kapalı';
+            } else {
+                isAmbiencePlaying = true;
+                murmurNode = startCafeMurmur();
+                playLofiChord();
+                chordInterval = setInterval(playLofiChord, 4800);
+                clinkInterval = setInterval(() => {
+                    if (Math.random() > 0.4) playCupClink();
+                }, 4000);
+                btn.classList.add('playing');
+                icon.textContent = '☕';
+                text.textContent = 'Kafe Ortamı: Açık';
+            }
+        }
+
+        function changeVolume(val) {
+            if (masterGain) masterGain.gain.value = val;
+        }
+
+        function playBell() {
+            initAudio();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(1046.50, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 1.5);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 1.5);
+        }
+
+        function updateDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            const formattedTime = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            timerDisplay.textContent = formattedTime;
+            document.title = `${formattedTime} - Kafe Pomodoro ☕`;
+        }
+
+        function updateCustomTime() {
+            if (isRunning) return;
+            let val = parseInt(minuteInput.value);
+            if (isNaN(val) || val < 1) val = 1;
+            if (val > 120) val = 120;
+            
+            modes[currentMode].time = val;
+            timeLeft = val * 60;
+            updateDisplay();
+        }
+
+        function toggleTimer() {
+            if (isRunning) {
+                clearInterval(timerId);
+                isRunning = false;
+                startBtn.textContent = 'Başlat';
+                minuteInput.disabled = false;
+            } else {
+                isRunning = true;
+                startBtn.textContent = 'Duraklat';
+                minuteInput.disabled = true;
+                timerId = setInterval(() => {
+                    timeLeft--;
+                    updateDisplay();
+
+                    if (timeLeft <= 0) {
+                        clearInterval(timerId);
+                        isRunning = false;
+                        startBtn.textContent = 'Başlat';
+                        minuteInput.disabled = false;
+                        playBell();
+
+                        if (currentMode === 'pomodoro') {
+                            completedCount++;
+                            countDisplay.textContent = completedCount;
+                            if (completedCount % 4 === 0) switchMode('long');
+                            else switchMode('short');
+                        } else {
+                            switchMode('pomodoro');
+                        }
+                    }
+                }, 1000);
+            }
+        }
+
+        function resetTimer() {
+            clearInterval(timerId);
+            isRunning = false;
+            startBtn.textContent = 'Başlat';
+            minuteInput.disabled = false;
+            timeLeft = modes[currentMode].time * 60;
+            updateDisplay();
+        }
+
+        function switchMode(mode) {
+            if (isRunning) return;
+            currentMode = mode;
+            
+            // Tüm butonların aktif sınıfını kaldır, tıklananı ekle
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`btn-${mode}`).classList.add('active');
+
+            // İlgili modun süresini input kutusuna ve sayaca yansıt
+            minuteInput.value = modes[mode].time;
+            timeLeft = modes[mode].time * 60;
+            updateDisplay();
+
+            // Tema renklerini güncelle
+            document.documentElement.style.setProperty('--bg-gradient', modes[mode].gradient);
+            document.documentElement.style.setProperty('--accent-color', modes[mode].accent);
+            document.documentElement.style.setProperty('--btn-bg', modes[mode].accent);
+        }
+
+        updateDisplay();
+    </script>
+</body>
+</html>
